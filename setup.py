@@ -2,7 +2,7 @@ import sys
 import tensorrt
 import torch
 from setuptools import setup, find_packages
-from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CppExtension
+from torch.utils.cpp_extension import BuildExtension
 from packaging import version
 
 
@@ -21,7 +21,11 @@ if version.parse(torch.__version__) < version.parse('1.5'):
 if version.parse(tensorrt.__version__) < version.parse('8'):
     compile_args_cxx.append('-DPRE_TRT8')
 
-plugins_ext_module = CUDAExtension(
+
+if '--plugins' in sys.argv:
+    from torch.utils.cpp_extension import CUDAExtension
+
+    plugins_ext_module = CUDAExtension(
         name='plugins',
         sources=[
             'torch2trt/plugins/plugins.cpp'
@@ -41,7 +45,6 @@ plugins_ext_module = CUDAExtension(
         }
     )
 
-if '--plugins' in sys.argv:
     ext_modules.append(plugins_ext_module)
     sys.argv.remove('--plugins')
 
